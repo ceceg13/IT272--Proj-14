@@ -6,12 +6,12 @@ ENVIRONMENT DIVISION.
 INPUT-OUTPUT SECTION.
 FILE-CONTROL.
     SELECT STUMAST
-        ASSIGN TO "/uploads/stumast(1).dat"
+        ASSIGN TO "uploads/stumast(1).dat"
         ORGANIZATION IS SEQUENTIAL
         FILE STATUS IS STUMAST-STATUS.
 
     SELECT STUMASTI
-        ASSIGN TO "/myfiles/stumasti.dat"
+        ASSIGN TO "myfiles/stumasti.dat"
         ORGANIZATION IS INDEXED
         ACCESS MODE IS DYNAMIC
         RECORD KEY IS SI-STUDENT-ID
