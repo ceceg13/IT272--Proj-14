@@ -2,13 +2,13 @@ PROJECT 14-1 - CREATE AN INDEXED STUDENT MASTER FILE
 
 Files in this package
 ---------------------
-PROJECT14_1_JDOODLE.cobc  - GnuCOBOL/JDoodle source program
+PROJECT14_1.cobc  - GnuCOBOL source program
 stumast(1).dat             - supplied sequential input file
 
 JDoodle setup
 -------------
 1. Create a COBOL project in JDoodle.
-2. Paste PROJECT14_1_JDOODLE.cobc into the source editor.
+2. Paste PROJECT14_1.cobc into the source editor.
 3. Upload stumast(1).dat to the project without changing its name.
 4. Run the program.
 5. A successful run displays:
