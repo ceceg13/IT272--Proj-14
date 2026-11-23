@@ -1,0 +1,325 @@
+>>SOURCE FORMAT FREE
+IDENTIFICATION DIVISION.
+PROGRAM-ID. PROJECT142.
+
+ENVIRONMENT DIVISION.
+INPUT-OUTPUT SECTION.
+FILE-CONTROL.
+    SELECT CRSEREG
+        ASSIGN TO "uploads/crsereg.dat"
+        ORGANIZATION IS SEQUENTIAL
+        FILE STATUS IS CRSEREG-STATUS.
+
+    SELECT STUMASTI
+        ASSIGN TO "myfiles/stumasti.dat"
+        ORGANIZATION IS INDEXED
+        ACCESS MODE IS RANDOM
+        RECORD KEY IS SM-STUDENT-ID
+        FILE STATUS IS STUMASTI-STATUS.
+
+    SELECT ERRRPT
+        ASSIGN TO "myfiles/errrpt.txt"
+        ORGANIZATION IS LINE SEQUENTIAL
+        FILE STATUS IS ERRRPT-STATUS.
+
+DATA DIVISION.
+FILE SECTION.
+
+FD CRSEREG
+    RECORD CONTAINS 83 CHARACTERS.
+01 COURSE-REGISTRATION-RECORD.
+    05 CR-COURSE-KEY.
+        10 CR-DEPARTMENT-CODE          PIC X(4).
+        10 CR-COURSE-NUMBER            PIC 9(3).
+        10 CR-SECTION-NUMBER           PIC 9(2).
+    05 CR-COURSE-INFORMATION.
+        10 CR-COURSE-TITLE             PIC X(20).
+        10 CR-COURSE-START-DATE.
+            15 CR-COURSE-START-YEAR    PIC 9(4).
+            15 CR-COURSE-START-MONTH   PIC 9(2).
+        10 CR-COURSE-UNITS             PIC 9.
+        10 CR-COURSE-DAYS              PIC 9.
+    05 CR-REGISTRATION-INFORMATION.
+        10 CR-TEACHER-NUMBER           PIC 9(3).
+        10 CR-STUDENT-INFORMATION.
+            15 CR-STUDENT-ID           PIC 9(9).
+            15 CR-STUDENT-NAME         PIC X(25).
+            15 CR-CLASS-STANDING       PIC 9.
+            15 CR-MAJOR                PIC X(4).
+    05 CR-GRADING-INFORMATION.
+        10 CR-6-WEEKS-GRADE            PIC X.
+        10 CR-12-WEEKS-GRADE           PIC X.
+        10 CR-FINAL-EXAM-GRADE         PIC X.
+        10 CR-SEMESTER-GRADE           PIC X.
+
+FD STUMASTI
+    RECORD CONTAINS 104 CHARACTERS.
+01 STUDENT-MASTER-RECORD.
+    05 SM-STUDENT-ID                   PIC 9(9).
+    05 SM-STUDENT-STATUS               PIC X.
+    05 SM-STUDENT-NAME                 PIC X(25).
+    05 SM-DATE-OF-BIRTH.
+        10 SM-DOB-YEAR                 PIC 9(4).
+        10 SM-DOB-MONTH                PIC 9(2).
+        10 SM-DOB-DAY                  PIC 9(2).
+    05 SM-STUDENT-ADDRESS              PIC X(25).
+    05 SM-STUDENT-CITY                 PIC X(11).
+    05 SM-STUDENT-STATE                PIC X(2).
+    05 SM-ZIP-CODE                     PIC 9(5).
+    05 SM-ZIP-CODE-EXT                 PIC 9(4).
+    05 SM-STUDENT-PROGRESS-SUMMARY.
+        10 SM-CLASS-STANDING           PIC 9.
+        10 SM-MAJOR                    PIC X(4).
+        10 SM-UNITS-COMPLETED          PIC 9(3).
+        10 SM-TOTAL-GRADE-POINTS       PIC 9(3).
+        10 SM-UNITS-IN-PROGRESS        PIC 9(3).
+
+FD ERRRPT.
+01 ERROR-REPORT-RECORD                 PIC X(110).
+
+WORKING-STORAGE SECTION.
+
+01 FILE-STATUS-FIELDS.
+    05 CRSEREG-STATUS                  PIC XX VALUE SPACES.
+    05 STUMASTI-STATUS                 PIC XX VALUE SPACES.
+    05 ERRRPT-STATUS                   PIC XX VALUE SPACES.
+
+01 CONTROL-FIELDS.
+    05 CRSEREG-EOF-SWITCH              PIC X VALUE "N".
+        88 CRSEREG-EOF                       VALUE "Y".
+    05 NUMERIC-GRADE                   PIC 9 VALUE ZERO.
+    05 COURSE-GRADE-POINTS             PIC 99 VALUE ZERO.
+    05 TRANSACTIONS-READ               PIC 9(5) VALUE ZERO.
+    05 STUDENTS-UPDATED                PIC 9(5) VALUE ZERO.
+    05 MISSING-STUDENTS                PIC 9(5) VALUE ZERO.
+
+01 CURRENT-DATE-AND-TIME.
+    05 CD-YEAR                         PIC 9(4).
+    05 CD-MONTH                        PIC 9(2).
+    05 CD-DAY                          PIC 9(2).
+    05 CD-HOURS                        PIC 9(2).
+    05 CD-MINUTES                      PIC 9(2).
+    05 FILLER                          PIC X(9).
+
+01 REPORT-HEADING-1.
+    05 FILLER                          PIC X(6) VALUE "DATE: ".
+    05 RH1-MONTH                       PIC 99.
+    05 FILLER                          PIC X VALUE "/".
+    05 RH1-DAY                         PIC 99.
+    05 FILLER                          PIC X VALUE "/".
+    05 RH1-YEAR                        PIC 9999.
+    05 FILLER                          PIC X(22) VALUE SPACES.
+    05 FILLER                          PIC X(34)
+        VALUE "MISSING STUDENT TRANSACTION REPORT".
+    05 FILLER                          PIC X(38) VALUE SPACES.
+
+01 REPORT-HEADING-2.
+    05 FILLER                          PIC X(6) VALUE "TIME: ".
+    05 RH2-HOURS                       PIC 99.
+    05 FILLER                          PIC X VALUE ":".
+    05 RH2-MINUTES                     PIC 99.
+    05 FILLER                          PIC X(99) VALUE SPACES.
+
+01 REPORT-HEADING-3.
+    05 FILLER                          PIC X(10) VALUE "STUDENT ID".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(25) VALUE "STUDENT NAME".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(11) VALUE "COURSE".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(20) VALUE "COURSE TITLE".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(5) VALUE "UNITS".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(5) VALUE "GRADE".
+    05 FILLER                          PIC X(3) VALUE SPACES.
+    05 FILLER                          PIC X(21) VALUE "REASON".
+
+01 REPORT-UNDERLINE.
+    05 FILLER                          PIC X(10) VALUE ALL "-".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(25) VALUE ALL "-".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(11) VALUE ALL "-".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(20) VALUE ALL "-".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(5) VALUE ALL "-".
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 FILLER                          PIC X(5) VALUE ALL "-".
+    05 FILLER                          PIC X(3) VALUE SPACES.
+    05 FILLER                          PIC X(21) VALUE ALL "-".
+
+01 ERROR-DETAIL-LINE.
+    05 EDL-STUDENT-ID                  PIC 9(9).
+    05 FILLER                          PIC X(3) VALUE SPACES.
+    05 EDL-STUDENT-NAME                PIC X(25).
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 EDL-DEPARTMENT                  PIC X(4).
+    05 EDL-COURSE-NUMBER               PIC 999.
+    05 FILLER                          PIC X VALUE "-".
+    05 EDL-SECTION-NUMBER              PIC 99.
+    05 FILLER                          PIC X(2) VALUE SPACES.
+    05 EDL-COURSE-TITLE                PIC X(20).
+    05 FILLER                          PIC X(4) VALUE SPACES.
+    05 EDL-COURSE-UNITS                PIC 9.
+    05 FILLER                          PIC X(6) VALUE SPACES.
+    05 EDL-SEMESTER-GRADE              PIC X.
+    05 FILLER                          PIC X(3) VALUE SPACES.
+    05 FILLER                          PIC X(21)
+        VALUE "STUDENT ID NOT FOUND".
+
+01 REPORT-TOTAL-LINE.
+    05 FILLER                          PIC X(28)
+        VALUE "MISSING TRANSACTIONS: ".
+    05 RTL-ERROR-COUNT                 PIC ZZ,ZZ9.
+    05 FILLER                          PIC X(76) VALUE SPACES.
+
+PROCEDURE DIVISION.
+
+000-UPDATE-STUDENT-MASTER.
+    PERFORM 050-OPEN-FILES
+
+    IF CRSEREG-STATUS = "00"
+       AND STUMASTI-STATUS = "00"
+       AND ERRRPT-STATUS = "00"
+        PERFORM 100-WRITE-REPORT-HEADINGS
+        PERFORM 200-PROCESS-REGISTRATIONS
+        PERFORM 600-WRITE-REPORT-TOTAL
+        CLOSE CRSEREG STUMASTI ERRRPT
+
+        DISPLAY "PROJECT 14-2 COMPLETED."
+        DISPLAY "COURSE RECORDS READ: " TRANSACTIONS-READ
+        DISPLAY "STUDENT RECORDS UPDATED: " STUDENTS-UPDATED
+        DISPLAY "MISSING STUDENT RECORDS: " MISSING-STUDENTS
+        DISPLAY "UPDATED MASTER: myfiles/stumasti.dat"
+        DISPLAY "ERROR REPORT:  myfiles/errrpt.txt"
+    ELSE
+        PERFORM 700-CLOSE-OPEN-FILES
+    END-IF
+
+    STOP RUN.
+
+050-OPEN-FILES.
+    OPEN INPUT CRSEREG
+    IF CRSEREG-STATUS NOT = "00"
+        DISPLAY "ERROR OPENING uploads/crsereg.dat. STATUS = "
+                CRSEREG-STATUS
+    ELSE
+        OPEN I-O STUMASTI
+        IF STUMASTI-STATUS NOT = "00"
+            DISPLAY "ERROR OPENING myfiles/stumasti.dat. STATUS = "
+                    STUMASTI-STATUS
+        ELSE
+            OPEN OUTPUT ERRRPT
+            IF ERRRPT-STATUS NOT = "00"
+                DISPLAY "ERROR OPENING myfiles/errrpt.txt. STATUS = "
+                        ERRRPT-STATUS
+            END-IF
+        END-IF
+    END-IF.
+
+100-WRITE-REPORT-HEADINGS.
+    MOVE FUNCTION CURRENT-DATE TO CURRENT-DATE-AND-TIME
+    MOVE CD-MONTH TO RH1-MONTH
+    MOVE CD-DAY TO RH1-DAY
+    MOVE CD-YEAR TO RH1-YEAR
+    MOVE CD-HOURS TO RH2-HOURS
+    MOVE CD-MINUTES TO RH2-MINUTES
+
+    MOVE REPORT-HEADING-1 TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD
+    MOVE REPORT-HEADING-2 TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD
+    MOVE SPACES TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD
+    MOVE REPORT-HEADING-3 TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD
+    MOVE REPORT-UNDERLINE TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD.
+
+200-PROCESS-REGISTRATIONS.
+    PERFORM UNTIL CRSEREG-EOF
+        READ CRSEREG
+            AT END
+                SET CRSEREG-EOF TO TRUE
+            NOT AT END
+                ADD 1 TO TRANSACTIONS-READ
+                PERFORM 300-PROCESS-ONE-REGISTRATION
+        END-READ
+    END-PERFORM.
+
+300-PROCESS-ONE-REGISTRATION.
+    MOVE CR-STUDENT-ID TO SM-STUDENT-ID
+
+    READ STUMASTI
+        INVALID KEY
+            PERFORM 500-WRITE-ERROR-TRANSACTION
+        NOT INVALID KEY
+            PERFORM 400-APPLY-COURSE-TRANSACTION
+            REWRITE STUDENT-MASTER-RECORD
+            IF STUMASTI-STATUS = "00"
+                ADD 1 TO STUDENTS-UPDATED
+            ELSE
+                DISPLAY "ERROR REWRITING STUDENT " SM-STUDENT-ID
+                        ". STATUS = " STUMASTI-STATUS
+            END-IF
+    END-READ.
+
+400-APPLY-COURSE-TRANSACTION.
+    EVALUATE FUNCTION UPPER-CASE(CR-SEMESTER-GRADE)
+        WHEN "A" MOVE 4 TO NUMERIC-GRADE
+        WHEN "B" MOVE 3 TO NUMERIC-GRADE
+        WHEN "C" MOVE 2 TO NUMERIC-GRADE
+        WHEN "D" MOVE 1 TO NUMERIC-GRADE
+        WHEN "F" MOVE 0 TO NUMERIC-GRADE
+        WHEN OTHER MOVE 0 TO NUMERIC-GRADE
+    END-EVALUATE
+
+    MULTIPLY NUMERIC-GRADE BY CR-COURSE-UNITS
+        GIVING COURSE-GRADE-POINTS
+
+    ADD CR-COURSE-UNITS TO SM-UNITS-COMPLETED
+        ON SIZE ERROR
+            DISPLAY "UNITS OVERFLOW FOR STUDENT " SM-STUDENT-ID
+            MOVE 999 TO SM-UNITS-COMPLETED
+    END-ADD
+
+    ADD COURSE-GRADE-POINTS TO SM-TOTAL-GRADE-POINTS
+        ON SIZE ERROR
+            DISPLAY "GRADE POINT OVERFLOW FOR STUDENT " SM-STUDENT-ID
+            MOVE 999 TO SM-TOTAL-GRADE-POINTS
+    END-ADD.
+
+500-WRITE-ERROR-TRANSACTION.
+    MOVE CR-STUDENT-ID TO EDL-STUDENT-ID
+    MOVE CR-STUDENT-NAME TO EDL-STUDENT-NAME
+    MOVE CR-DEPARTMENT-CODE TO EDL-DEPARTMENT
+    MOVE CR-COURSE-NUMBER TO EDL-COURSE-NUMBER
+    MOVE CR-SECTION-NUMBER TO EDL-SECTION-NUMBER
+    MOVE CR-COURSE-TITLE TO EDL-COURSE-TITLE
+    MOVE CR-COURSE-UNITS TO EDL-COURSE-UNITS
+    MOVE CR-SEMESTER-GRADE TO EDL-SEMESTER-GRADE
+    MOVE ERROR-DETAIL-LINE TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD
+    ADD 1 TO MISSING-STUDENTS.
+
+600-WRITE-REPORT-TOTAL.
+    MOVE MISSING-STUDENTS TO RTL-ERROR-COUNT
+    MOVE SPACES TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD
+    MOVE REPORT-TOTAL-LINE TO ERROR-REPORT-RECORD
+    WRITE ERROR-REPORT-RECORD.
+
+700-CLOSE-OPEN-FILES.
+    IF CRSEREG-STATUS = "00"
+        CLOSE CRSEREG
+    END-IF
+    IF STUMASTI-STATUS = "00"
+        CLOSE STUMASTI
+    END-IF
+    IF ERRRPT-STATUS = "00"
+        CLOSE ERRRPT
+    END-IF.
+
+END PROGRAM PROJECT142.
