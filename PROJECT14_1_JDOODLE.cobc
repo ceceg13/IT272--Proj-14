@@ -1,0 +1,141 @@
+>>SOURCE FORMAT FREE
+IDENTIFICATION DIVISION.
+PROGRAM-ID. PROJECT141.
+
+ENVIRONMENT DIVISION.
+INPUT-OUTPUT SECTION.
+FILE-CONTROL.
+    SELECT STUMAST
+        ASSIGN TO "/uploads/stumast(1).dat"
+        ORGANIZATION IS SEQUENTIAL
+        FILE STATUS IS STUMAST-STATUS.
+
+    SELECT STUMASTI
+        ASSIGN TO "/myfiles/stumasti.dat"
+        ORGANIZATION IS INDEXED
+        ACCESS MODE IS DYNAMIC
+        RECORD KEY IS SI-STUDENT-ID
+        FILE STATUS IS STUMASTI-STATUS.
+
+DATA DIVISION.
+FILE SECTION.
+
+FD  STUMAST
+    RECORD CONTAINS 104 CHARACTERS.
+01  STUDENT-MASTER-RECORD.
+    05 SM-STUDENT-ID                   PIC 9(9).
+    05 SM-STUDENT-STATUS               PIC X.
+    05 SM-STUDENT-NAME                 PIC X(25).
+    05 SM-DATE-OF-BIRTH.
+        10 SM-DOB-YEAR                 PIC 9(4).
+        10 SM-DOB-MONTH                PIC 9(2).
+        10 SM-DOB-DAY                  PIC 9(2).
+    05 SM-STUDENT-ADDRESS              PIC X(25).
+    05 SM-STUDENT-CITY                 PIC X(11).
+    05 SM-STUDENT-STATE                PIC X(2).
+    05 SM-ZIP-CODE                     PIC 9(5).
+    05 SM-ZIP-CODE-EXT                 PIC 9(4).
+    05 SM-STUDENT-PROGRESS-SUMMARY.
+        10 SM-CLASS-STANDING           PIC 9.
+        10 SM-MAJOR                    PIC X(4).
+        10 SM-UNITS-COMPLETED          PIC 9(3).
+        10 SM-TOTAL-GRADE-POINTS       PIC 9(3).
+        10 SM-UNITS-IN-PROGRESS        PIC 9(3).
+
+FD  STUMASTI
+    RECORD CONTAINS 104 CHARACTERS.
+01  INDEXED-STUDENT-MASTER-RECORD.
+    05 SI-STUDENT-ID                   PIC 9(9).
+    05 SI-STUDENT-STATUS               PIC X.
+    05 SI-STUDENT-NAME                 PIC X(25).
+    05 SI-DATE-OF-BIRTH.
+        10 SI-DOB-YEAR                 PIC 9(4).
+        10 SI-DOB-MONTH                PIC 9(2).
+        10 SI-DOB-DAY                  PIC 9(2).
+    05 SI-STUDENT-ADDRESS              PIC X(25).
+    05 SI-STUDENT-CITY                 PIC X(11).
+    05 SI-STUDENT-STATE                PIC X(2).
+    05 SI-ZIP-CODE                     PIC 9(5).
+    05 SI-ZIP-CODE-EXT                 PIC 9(4).
+    05 SI-STUDENT-PROGRESS-SUMMARY.
+        10 SI-CLASS-STANDING           PIC 9.
+        10 SI-MAJOR                    PIC X(4).
+        10 SI-UNITS-COMPLETED          PIC 9(3).
+        10 SI-TOTAL-GRADE-POINTS       PIC 9(3).
+        10 SI-UNITS-IN-PROGRESS        PIC 9(3).
+
+WORKING-STORAGE SECTION.
+01  FILE-STATUS-FIELDS.
+    05 STUMAST-STATUS                  PIC XX VALUE SPACES.
+    05 STUMASTI-STATUS                 PIC XX VALUE SPACES.
+
+01  CONTROL-FIELDS.
+    05 STUMAST-EOF-SWITCH              PIC X VALUE "N".
+        88 STUMAST-EOF                 VALUE "Y".
+    05 RECORDS-WRITTEN                 PIC 9(5) VALUE ZERO.
+    05 DISPLAY-RECORDS-WRITTEN         PIC Z,ZZ9.
+
+PROCEDURE DIVISION.
+100-MAIN.
+    PERFORM 200-OPEN-FILES
+
+    IF STUMAST-STATUS = "00"
+       AND STUMASTI-STATUS = "00"
+        PERFORM 300-CONVERT-FILE
+        PERFORM 400-CLOSE-FILES
+        MOVE RECORDS-WRITTEN TO DISPLAY-RECORDS-WRITTEN
+        DISPLAY "PROJECT 14-1 COMPLETED."
+        DISPLAY DISPLAY-RECORDS-WRITTEN
+                " STUDENT RECORDS WRITTEN TO STUMASTI."
+    ELSE
+        PERFORM 400-CLOSE-OPEN-FILES
+    END-IF
+
+    STOP RUN.
+
+200-OPEN-FILES.
+    OPEN INPUT STUMAST
+    IF STUMAST-STATUS NOT = "00"
+        DISPLAY "ERROR OPENING STUMAST. STATUS = "
+                STUMAST-STATUS
+    ELSE
+        OPEN OUTPUT STUMASTI
+        IF STUMASTI-STATUS NOT = "00"
+            DISPLAY "ERROR OPENING STUMASTI. STATUS = "
+                    STUMASTI-STATUS
+        END-IF
+    END-IF.
+
+300-CONVERT-FILE.
+    PERFORM UNTIL STUMAST-EOF
+        READ STUMAST
+            AT END
+                SET STUMAST-EOF TO TRUE
+            NOT AT END
+                MOVE STUDENT-MASTER-RECORD
+                  TO INDEXED-STUDENT-MASTER-RECORD
+                WRITE INDEXED-STUDENT-MASTER-RECORD
+                EVALUATE STUMASTI-STATUS
+                    WHEN "00"
+                        ADD 1 TO RECORDS-WRITTEN
+                    WHEN "22"
+                        DISPLAY "DUPLICATE STUDENT ID: "
+                                SI-STUDENT-ID
+                    WHEN OTHER
+                        DISPLAY "ERROR WRITING STUDENT "
+                                SI-STUDENT-ID
+                                ". STATUS = " STUMASTI-STATUS
+                END-EVALUATE
+        END-READ
+    END-PERFORM.
+
+400-CLOSE-FILES.
+    CLOSE STUMAST STUMASTI.
+
+400-CLOSE-OPEN-FILES.
+    IF STUMAST-STATUS = "00"
+        CLOSE STUMAST
+    END-IF
+    IF STUMASTI-STATUS = "00"
+        CLOSE STUMASTI
+    END-IF.
