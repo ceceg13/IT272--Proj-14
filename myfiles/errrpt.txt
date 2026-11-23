@@ -1,0 +1,56 @@
+DATE: 11/23/2026                      MISSING STUDENT TRANSACTION REPORT
+TIME: 01:25
+
+STUDENT ID  STUDENT NAME               COURSE       COURSE TITLE          UNITS  GRADE   REASON
+----------  -------------------------  -----------  --------------------  -----  -----   ---------------------
+*********   ************
+      ** CO        *-**  ********************    *      I   STUDENT ID NOT FOUND
+*********   *************************  STRATIO-N   RECORD LAYOUT
+         *      *   STUDENT ID NOT FOUND
+CORD.
+              05  CR-COURSE-KE  **
+ 
+-         01  COURSE-REGI    O          STUDENT ID NOT FOUND
+  PIC X(0   4).
+               10  C         -     10  CR-DEPARTMENT-C           -   STUDENT ID NOT FOUND
+     10     CR-SECTION-NUMBER          NUMBER -             PIC 9(03).           (   STUDENT ID NOT FOUND
+ON.
+                  10  CR-COURSE-  02).
+ -            05  CR-COURS    R          STUDENT ID NOT FOUND
+CR-COURSE   -START-DATE.
+                    -    PIC X(20).
+                   1   STUDENT ID NOT FOUND
+                     15  CR-COURSE-ST  5  CR-C-OU  RSE-START-YEAR    PI    )      H   STUDENT ID NOT FOUND
+RSE-UNITS                PIC 9(01).
+     PIC -9(  02).
+                  R          STUDENT ID NOT FOUND
+C 9(01).   
+           05  CR-REGIST        1-0    CR-COURSE-DAYS                N   STUDENT ID NOT FOUND
+R-NUMBER              PIC 9(03).
+     FORMATI-ON  .
+               10    E          STUDENT ID NOT FOUND
+              15  CR-STUDENT-ID           10  -CR  -STUDENT-INFORMATION               STUDENT ID NOT FOUND
+T-NAME            PIC X(25).
+         9(09).-
+                     15    T          STUDENT ID NOT FOUND
+.
+                          88  FRES     15  -CR  -CLASS-STANDING         9          STUDENT ID NOT FOUND
+88  SOPHO   MORE           VALUE 2.
+         -VA  LUE 1.
+                           STUDENT ID NOT FOUND
+LUE 3.
+                          88          -         88  JUNIOR                    STUDENT ID NOT FOUND
+ 15  CR-M   AJOR                PIC X         -       VALUE 4.
+                      STUDENT ID NOT FOUND
+                10  CR-6-WEEKS-GRADE          -    05  CR-GRADING-INFOR    .          STUDENT ID NOT FOUND
+EEKS-GRAD   E           PIC X(01).
+     PIC X-(0  1).
+                   -          STUDENT ID NOT FOUND
+ X(01).
+                  10  CR-SEM       10-    CR-FINAL-EXAM-GRADE            A   STUDENT ID NOT FOUND
+ X(01).
+                  10  CR-SEM  DE     -        PIC X(01).
+
+E            A   STUDENT ID NOT FOUND
+
+MISSING TRANSACTIONS:           21
